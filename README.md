@@ -1,1 +1,14 @@
-# TensorServe
+# TensorServe - Inference Engine
+![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python)
+![FastAPI](https://img.shields.io/badge/FastAPI-API-009688?logo=fastapi)
+![React](https://img.shields.io/badge/React-Frontend-61DAFB?logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-Frontend-3178C6?logo=typescript)
+![Vite](https://img.shields.io/badge/Vite-Build%20Tool-646CFF?logo=vite)
+![PyTorch](https://img.shields.io/badge/PyTorch-Deep%20Learning-EE4C2C?logo=pytorch)
+![Hugging%20Face](https://img.shields.io/badge/Hugging%20Face-Transformers-FFD21E?logo=huggingface)
+![CUDA](https://img.shields.io/badge/CUDA-GPU%20Acceleration-76B900?logo=nvidia)
+![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?logo=docker)
+![Pydantic](https://img.shields.io/badge/Pydantic-Data%20Validation-E92063?logo=pydantic)
+![Uvicorn](https://img.shields.io/badge/Uvicorn-ASGI-499848?logo=gunicorn)
+![License](https://img.shields.io/badge/License-MIT-green)
+![Status](https://img.shields.io/badge/Project-Active-success)
