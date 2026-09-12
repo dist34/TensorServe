@@ -34,3 +34,11 @@
 - [Known Limitations](#known-limitations)
 - [Contributing](#contributing)
 - [License](#license)
+
+Overview
+--------
+
+**TensorServe** is a GPU-accelerated inference and benchmarking platform designed to analyze and evaluate the performance of modern machine learning models.
+It provides a developer-focused interface for running model inference, experimenting with generation configurations, and benchmarking different inference settings. The backend is built with **FastAPI**, **PyTorch**, and **Hugging Face Transformers**, while the frontend uses **React, TypeScript, and Vite**.
+
+A key focus of TensorServe is understanding how inference optimizations such as **KV caching** affect generation performance. The platform allows users to compare inference behavior with KV caching enabled and disabled while observing the resulting performance differences. This project is designed to provide a foundation for deeper exploration of **LLM inference, GPU acceleration, model execution, and inference optimization**.
