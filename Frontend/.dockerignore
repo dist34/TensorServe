@@ -1,0 +1,11 @@
+node_modules
+dist
+.git
+.env
+.env.example
+*.log
+.tanstack
+tsconfig.tsbuildinfo
+src/components/inferx/metric-card.tsx
+src/routes/metrics.tsx
+src/contexts/auth-context.tsx

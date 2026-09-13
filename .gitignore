@@ -1,0 +1,70 @@
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+dist-ssr/
+build/
+
+# Vite
+.vite/
+*.local
+
+routeTree.gen.ts
+
+
+*.tsbuildinfo
+
+.env
+.env.local
+.env.*.local
+
+!.env.example
+
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+logs/
+*.log
+
+
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+
+.DS_Store
+Thumbs.db
+
+*.pid
+
+# Metrics - future implementation
+B# Metrics - future implementation
+Backend/app/api/metrics.py
+Backend/app/monitoring/metrics.py
+Backend/app/monitoring/inference_metrics.py
+Backend/app/schemas/metrics.py
+Backend/.venv/
+Backend/venv/
+Backend/env/
+Frontend/src/**/metrics.ts
+Frontend/src/**/metrics.tsx
+Frontend/.tanstack/
+Backend/*.db
+Backend/*.sqlite3
+
+# Standard ignores for both projects
+Backend/**/__pycache__/
+Backend/**/*.pyc
+Backend/.env
+Frontend/node_modules/
+Frontend/dist/
+Frontend/.env

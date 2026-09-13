@@ -1,0 +1,17 @@
+﻿.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.git/
+.gitignore
+.env
+tensorserve.db
+*.log
+Dockerfile
+.dockerignore
+app/api/metrics.py
+app/monitoring/inference_metrics
+app/monitor/metrics
+app/schemas/metrics
