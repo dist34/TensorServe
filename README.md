@@ -294,5 +294,8 @@ These results demonstrate the practical impact of KV caching on autoregressive i
 - **Advanced Compute Infrastructure** --- Test TensorServe on higher-VRAM and higher-performance GPUs to support larger models and more demanding workloads.
 - **Model-Specific Optimization** --- Introduce architecture-aware inference and caching strategies for models that use different attention or state-management mechanisms.
 
+## License
+TensorServe is licensed under the [MIT License](LICENSE).
+
 
 
