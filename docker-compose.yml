@@ -1,0 +1,50 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: tensorserve-backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./Backend/.env
+    volumes:
+      # Live-reload backend code changes without rebuilding the image
+      - ./Backend:/app
+      # Keep the container's own venv/deps separate from the host mount
+      - backend_venv:/app/.venv
+    restart: unless-stopped
+    networks:
+      - tensorserve-net
+
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    container_name: tensorserve-frontend
+    ports:
+      - "5173:5173"
+    env_file:
+      - ./Frontend/.env
+    environment:
+      # Points the frontend at the backend service by its container name,
+      # not localhost, since they're on the same Docker network
+      - VITE_API_URL=http://backend:8000
+    volumes:
+      - ./Frontend:/app
+      - frontend_node_modules:/app/node_modules
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - tensorserve-net
+
+networks:
+  tensorserve-net:
+    driver: bridge
+
+volumes:
+  backend_venv:
+  frontend_node_modules:
