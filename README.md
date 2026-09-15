@@ -196,33 +196,71 @@ FastAPI also provides interactive API documentation when the development server 
 -   NVIDIA GPU with CUDA support for GPU inference
 -   Git
 
-## Docker
+Docker
+------
 
-TensorServe provides Docker support for running the backend in a consistent environment.
+TensorServe provides Docker support for running the frontend and backend in isolated, consistent environments.
 
-The backend Docker image is designed to support **NVIDIA GPU acceleration** through the NVIDIA Container Toolkit.
+The backend supports NVIDIA GPU acceleration through the NVIDIA Container Toolkit.
 
-### Build the Image
+### Prerequisites
 
-From the backend directory:
+Install Docker Desktop.
 
-```
-docker build -t tensorserve-backend .
-```
+For GPU acceleration, install and configure the NVIDIA Container Toolkit.
 
-### Run with GPU Support
+### Environment Configuration
 
-```
-docker run --gpus all -p 8000:8000 tensorserve-backend
-```
-
-The FastAPI backend will then be accessible at:
+Copy the example environment files:
 
 ```
-http://localhost:8000
+cp Backend/.env.example Backend/.env
+cp Frontend/.env.example Frontend/.env
 ```
 
-The model is downloaded through Hugging Face when required rather than being included directly inside the Docker image. A persistent Hugging Face cache can be mounted to avoid downloading the model again when recreating containers.
+Update the `.env` files with your configuration if required.
+
+### Run TensorServe
+
+From the root directory of the TensorServe repository, run:
+
+```
+docker compose up --build
+```
+
+This will build and start both the frontend and backend containers.
+
+The frontend will be available at:
+
+<http://localhost:5173>
+
+The backend API will be available at:
+
+<http://localhost:8000>
+
+### Run in the Background
+
+To run TensorServe in the background:
+
+```
+docker compose up --build -d
+```
+
+### Stop TensorServe
+
+```
+docker compose down
+```
+
+### GPU Support
+
+The backend Docker image is designed to support NVIDIA GPU acceleration. Make sure the NVIDIA Container Toolkit is installed and configured on the host system before using GPU acceleration.
+
+### Hugging Face Model Cache
+
+The model is downloaded through Hugging Face when required rather than being included directly inside the Docker image.
+
+A persistent Hugging Face cache can be mounted to avoid downloading the model again when recreating containers.
 
 ## Configuration
 
