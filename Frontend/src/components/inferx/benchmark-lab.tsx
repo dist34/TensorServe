@@ -93,7 +93,8 @@ type BenchmarkStatus =
 
 interface BenchmarkEvent {
   type: "run_complete" | "run_error" | "benchmark_complete";
-  run?: number;
+  id?: number;
+  run?: number
   total?: number;
   total_runs?: number;
   input_tokens?: number;
@@ -424,6 +425,7 @@ async function runBenchmark(
             const failed_runs = (event.total_runs || payload.runs) - successful_runs;
 
             finalResult = {
+              id: event.id,
               total_runs: payload.runs,
               successful_runs,
               failed_runs,
@@ -483,7 +485,24 @@ async function runBenchmark(
 
   return finalResult;
 }
+async function deleteBenchmarkResult(
+  id: number,
+  token: string | null,
+): Promise<void> {
+  const response = await fetch(
+    `${BENCHMARK_API_BASE_URL}/benchmark/history/${id}`,
+    {
+      method: "DELETE",
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    },
+  );
 
+  if (!response.ok) {
+    throw new Error(`Failed to delete benchmark result ${id} (${response.status})`);
+  }
+}
 /* -------------------------------------------------------------------------- */
 /* Shared UI                                                                  */
 /* -------------------------------------------------------------------------- */
@@ -1056,8 +1075,8 @@ export default function BenchmarkLabContent() {
   const abortRef =
     useRef<AbortController | null>(null);
 
-  const runNumberRef =
-    useRef(1);
+  const fallbackIdRef =
+    useRef(-1);
 
   const [currentRun, setCurrentRun] =
     useState(0);
@@ -1294,7 +1313,7 @@ export default function BenchmarkLabContent() {
         /* -------------------------------------------------------------- */
 
         const run: BenchmarkRun = {
-          id: runNumberRef.current++,
+           id: result.id ?? fallbackIdRef.current--,
 
           requests:
             result.total_runs,
@@ -1377,12 +1396,61 @@ export default function BenchmarkLabContent() {
     }, []);
 
   const handleDeleteRun =
-    useCallback((runId: number) => {
-      setRuns((current) =>
-        current.filter((run) => run.id !== runId)
-      );
-    }, []);
+     useCallback((runId: number) => {
+    const removedRun = runs.find((run) => run.id === runId);
 
+    setRuns((current) =>
+      current.filter((run) => run.id !== runId)
+    );
+
+    if (runId < 0) {
+      return;
+    }
+
+    void deleteBenchmarkResult(runId, token).catch((error) => {
+      console.error("Failed to delete run:", error);
+
+      if (removedRun) {
+        setRuns((current) => [removedRun, ...current]);
+      }
+
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Failed to delete benchmark run",
+      );
+    });
+  }, [runs, token]);
+
+  const handleClearGroup =
+  useCallback((kvCache: boolean) => {
+    const toRemove = runs.filter((run) => run.kvCache === kvCache);
+
+    setRuns((current) =>
+      current.filter((run) => run.kvCache !== kvCache)
+    );
+
+    const deletable = toRemove.filter((run) => run.id >= 0);
+
+    void Promise.allSettled(
+      deletable.map((run) => deleteBenchmarkResult(run.id, token)),
+    ).then((outcomes) => {
+      const failed = outcomes
+        .map((outcome, index) => ({ outcome, run: deletable[index] }))
+        .filter(({ outcome }) => outcome.status === "rejected");
+
+      if (failed.length > 0) {
+        setRuns((current) => [
+          ...failed.map(({ run }) => run),
+          ...current,
+        ]);
+
+        setErrorMessage(
+          `Failed to delete ${failed.length} of ${deletable.length} runs`,
+        );
+      }
+    });
+  }, [runs, token]);
   /* ---------------------------------------------------------------------- */
   /* Run / cancel button                                                    */
   /* ---------------------------------------------------------------------- */
@@ -2041,9 +2109,7 @@ export default function BenchmarkLabContent() {
                       </div>
                       <button
                         type="button"
-                        onClick={() => {
-                          setRuns((current) => current.filter(run => !run.kvCache));
-                        }}
+                        onClick={() => handleClearGroup(true)}
                         className="text-[10px] text-muted-foreground transition hover:text-destructive"
                       >
                         Clear
@@ -2150,9 +2216,7 @@ export default function BenchmarkLabContent() {
                       </div>
                       <button
                         type="button"
-                        onClick={() => {
-                          setRuns((current) => current.filter(run => run.kvCache));
-                        }}
+                        onClick={() => handleClearGroup(false)}
                         className="text-[10px] text-muted-foreground transition hover:text-destructive"
                       >
                         Clear

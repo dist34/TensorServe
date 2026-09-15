@@ -72,3 +72,4 @@ class BenchmarkResponse(BaseModel):
 class BenchmarkHistoryResponse(BenchmarkResponse):
     id: int
     created_at: str
+    use_kv_cache: bool = True

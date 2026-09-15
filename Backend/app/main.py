@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+from app.api.auth import router as auth_router
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware

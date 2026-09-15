@@ -1,6 +1,6 @@
 import json
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, HTTPException, status
 from fastapi.responses import StreamingResponse
 
 from app.engine.benchmark_runner import BenchmarkRunner
@@ -9,7 +9,11 @@ from app.schemas.benchmark import BenchmarkHistoryResponse
 from app.schemas.generation import GenerationConfig
 from app.auth.dependencies import get_current_user
 from app.auth.models import User
-from app.auth.database import create_benchmark_result, get_benchmark_results
+from app.auth.database import (
+    create_benchmark_result,
+    get_benchmark_results,
+    delete_benchmark_result,
+)
 
 
 def _throughput_samples(completed_runs: list[dict]) -> list[dict[str, float]]:
@@ -82,8 +86,14 @@ async def benchmark(
                     "peak_gpu_temperature_c": event["peak_gpu_temperature_c"],
                     "peak_gpu_power_usage_w": event["peak_gpu_power_usage_w"],
                     "throughput_samples": _throughput_samples(completed_runs),
+                    "use_kv_cache": request.use_kv_cache,
                 }
-                create_benchmark_result(current_user.id, result)
+                new_id = create_benchmark_result(current_user.id, result)
+                # Attach the real DB id to the completion event so the
+                # frontend can use it immediately (instead of a fake
+                # client-side counter) if this run is ever deleted in
+                # the same session, before a page reload.
+                event["id"] = new_id
             yield json.dumps(event) + "\n"
 
     return StreamingResponse(
@@ -97,3 +107,17 @@ async def benchmark_history(
     current_user: User = Depends(get_current_user),
 ):
     return get_benchmark_results(current_user.id)
+
+
+@router.delete("/history/{result_id}")
+async def delete_benchmark_history_entry(
+    result_id: int,
+    current_user: User = Depends(get_current_user),
+):
+    deleted = delete_benchmark_result(result_id, current_user.id)
+    if not deleted:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Benchmark result not found",
+        )
+    return {"deleted": True, "id": result_id}

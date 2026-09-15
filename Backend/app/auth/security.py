@@ -13,6 +13,9 @@ if not SECRET_KEY:
         "Generate one with: python -c \"import secrets; print(secrets.token_hex(32))\""
     )
 
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
 def hash_password(password: str) -> str:
     return pwd_context.hash(password)
 
