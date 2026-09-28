@@ -24,3 +24,5 @@ bcrypt>=3.2.0,<4.1.0
 
 # HTTP Client & Utilities
 requests>=2.31.0
+#email validation
+email-validator

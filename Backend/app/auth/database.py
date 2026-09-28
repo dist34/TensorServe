@@ -166,8 +166,8 @@ def create_benchmark_result(user_id: int, result: Dict[str, Any]) -> int:
                 average_tokens_per_second, peak_ram_percent,
                 peak_ram_used_mb, peak_gpu_utilization_percent,
                 peak_gpu_memory_used_mb, peak_gpu_temperature_c,
-                peak_gpu_power_usage_w, throughput_samples
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                peak_gpu_power_usage_w, throughput_samples, use_kv_cache
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 user_id,
@@ -186,10 +186,11 @@ def create_benchmark_result(user_id: int, result: Dict[str, Any]) -> int:
                 result["peak_gpu_temperature_c"],
                 result["peak_gpu_power_usage_w"],
                 json.dumps(result.get("throughput_samples", [])),
+                bool(result.get("use_kv_cache", True)),
             ),
         )
         return cursor.lastrowid
-
+    
 
 def _normalize_throughput_samples(samples: Any) -> list[Dict[str, float]]:
     """Accept timed samples, and coerce legacy float arrays for history."""
@@ -241,3 +242,16 @@ def get_benchmark_results(user_id: int) -> list[Dict[str, Any]]:
         )
         results.append(result)
     return results
+
+def delete_benchmark_result(result_id: int, user_id: int) -> bool:
+    """
+    Delete one benchmark result, scoped to the owning user.
+    Returns True if a row was deleted, False if none matched.
+    """
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "DELETE FROM benchmark_results WHERE id = ? AND user_id = ?",
+            (result_id, user_id),
+        )
+        return cursor.rowcount > 0

@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   backend:
     build:
@@ -10,6 +8,16 @@ services:
       - "8000:8000"
     env_file:
       - ./Backend/.env
+    environment:
+      - NVIDIA_DRIVER_CAPABILITIES=all
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+            # specific to my nvidia gpu (0) which is 1650 change this according to ur preference
+              device_ids: ["0"]
+              capabilities: [gpu]
     volumes:
       # Live-reload backend code changes without rebuilding the image
       - ./Backend:/app
@@ -29,9 +37,9 @@ services:
     env_file:
       - ./Frontend/.env
     environment:
-      # Points the frontend at the backend service by its container name,
-      # not localhost, since they're on the same Docker network
-      - VITE_API_URL=http://backend:8000
+      # The browser (not the container) calls the API, so this must be
+      # a host-reachable address, not the Docker service name.
+      - VITE_API_URL=http://localhost:8000
     volumes:
       - ./Frontend:/app
       - frontend_node_modules:/app/node_modules
